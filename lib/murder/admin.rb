@@ -1,10 +1,10 @@
-# Copyright 2010 Twitter, Inc.
-# Copyright 2010 Larry Gadea <lg@twitter.com>
-# Copyright 2010 Matt Freels <freels@twitter.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
-# not use this file except in compliance with the License. You may obtain
-# a copy of the License at
+# Copyright 2010 Twitter, Inc.                                                                                                                                                                  
+# Copyright 2010 Larry Gadea <lg@twitter.com>                                                                                                                                                   
+# Copyright 2010 Matt Freels <freels@twitter.com>                                                                                                                                               
+#                                                                                                                                                                                               
+# Licensed under the Apache License, Version 2.0 (the "License"); you may                                                                                                                       
+# not use this file except in compliance with the License. You may obtain                                                                                                                       
+# a copy of the License at                                                                                                                                                                      
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -39,18 +39,26 @@ namespace :murder do
     run("SCREENRC=/dev/null SYSSCREENRC=/dev/null screen -dms murder_tracker python #{remote_murder_path}/murder_tracker.py && sleep 0.2", :pty => true)
   end
 
+
   desc "If the Bittorrent tracker is running, this will kill the process. Note that if it is not running you will receive an error."
   task :stop_tracker, :roles => :tracker do
-    run("pkill -f 'SCREEN.*murder_tracker.py'")
+    pkill('SCREEN.*murder_tracker.py')
   end
 
   desc "Identical to stop_seeding, except this will kill all seeding processes. No 'tag' argument is needed."
   task :stop_all_seeding, :roles => :seeder do
-    run("pkill -f \"SCREEN.*seeder-\"")
+    pkill('SCREEN.*seeder-*')
   end
 
   desc 'Sometimes peers can go on forever (usually because of an error). This command will forcibly kill all "murder_client.py peer" commands that are running.'
   task :stop_all_peering, :roles => :peer do
-    run("pkill -f \"murder_client.py peer\"")
+    pkill('murder_client.py.peer*')
   end
 end
+
+
+#Replaces pkill because this wont fail
+def pkill(name)
+  run "ps -ef | grep #{name} | grep -v grep | awk '{print $2}' | xargs kill || echo 'no process with name #{name} found'"
+end
+

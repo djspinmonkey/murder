@@ -61,7 +61,7 @@ namespace :murder do
   DESC
   task :stop_seeding, :roles => :seeder do
     require_tag
-    run("pkill -f \"SCREEN.*seeder-#{tag}\"")
+    pkill("SCREEN.*seeder-#{tag}")
   end
 
   desc <<-DESC
@@ -102,7 +102,7 @@ namespace :murder do
 
   task :stop_peering, :roles => :peer do
     require_tag
-    run("pkill -f \"murder_client.py peer.*#{filename}\"")
+    pkill("murder_client.py.peer*#{filename}")
   end
 
   task :clean_temp_files, :roles => [:peer, :seeder] do
@@ -128,3 +128,9 @@ namespace :murder do
     set :filename, "#{tmp}/#{tag}.tgz"
   end
 end
+
+#Replaces pkill because this wont fail
+def pkill(name)
+  run "ps -ef | grep #{name} | grep -v grep | awk '{print $2}' | xargs kill || echo 'no process with name #{name} found'"
+end
+
